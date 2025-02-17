@@ -53,8 +53,19 @@ class _HomePageState extends State<HomePage> {
   double _total = 0.0;
   int _selectedIndex = 0;
 
-  void _addExpense(
-      String title, double amount, DateTime date, String category) {
+  // Controllers for the form
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose of the controllers when the widget is disposed
+    _titleController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  void _addExpense(String title, double amount, DateTime date, String category) {
     setState(() {
       _expense.add(Expense(
           title: title, amount: amount, date: date, category: category));
@@ -70,9 +81,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showForm(BuildContext context) {
-    final titleController = TextEditingController();
-    final amountController = TextEditingController();
-    String selectedCategory = _categories.first;
+    String? selectedCategory;
     DateTime selectedDate = DateTime.now();
 
     showModalBottomSheet(
@@ -92,12 +101,12 @@ class _HomePageState extends State<HomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    controller: titleController,
+                    controller: _titleController,
                     decoration: const InputDecoration(labelText: 'Title'),
                   ),
                   const SizedBox(height: 10),
                   TextField(
-                    controller: amountController,
+                    controller: _amountController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Amount'),
                   ),
@@ -126,19 +135,22 @@ class _HomePageState extends State<HomePage> {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        if (titleController.text.isEmpty ||
-                            amountController.text.isEmpty) {
+                        if (_titleController.text.isEmpty ||
+                            _amountController.text.isEmpty ||
+                            selectedCategory == null) {
                           return;
                         }
-                        double? amount = double.tryParse(amountController.text);
+                        double? amount = double.tryParse(_amountController.text);
                         if (amount == null) {
                           return;
                         }
                         setState(() {
-                          _addExpense(titleController.text, amount,
-                              selectedDate, selectedCategory);
+                          _addExpense(_titleController.text, amount,
+                              selectedDate, selectedCategory!);
                         });
                         Navigator.of(context).pop();
+                        _titleController.clear();
+                        _amountController.clear();
                       },
                       child: const Text("Add Expense"),
                     ),
@@ -150,10 +162,7 @@ class _HomePageState extends State<HomePage> {
           },
         );
       },
-    ).whenComplete(() {
-      titleController.dispose();
-      amountController.dispose();
-    });
+    );
   }
 
   void _onItemTapped(int index) {
@@ -182,7 +191,7 @@ class _HomePageState extends State<HomePage> {
           Card(
             margin: const EdgeInsets.all(20),
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             elevation: 5,
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -222,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       subtitle:
-                          Text(DateFormat.yMMMd().format(_expense[index].date)),
+                      Text(DateFormat.yMMMd().format(_expense[index].date)),
                       trailing: Text(
                         "\$${_expense[index].amount.toStringAsFixed(2)}",
                         style: const TextStyle(
