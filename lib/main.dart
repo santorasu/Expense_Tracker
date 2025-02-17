@@ -65,7 +65,8 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _addExpense(String title, double amount, DateTime date, String category) {
+  void _addExpense(
+      String title, double amount, DateTime date, String category) {
     setState(() {
       _expense.add(Expense(
           title: title, amount: amount, date: date, category: category));
@@ -77,6 +78,13 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _total -= _expense[index].amount;
       _expense.removeAt(index);
+    });
+  }
+
+  void resetTotal() {
+    setState(() {
+  this._total = 0.0;
+  _expense.clear();
     });
   }
 
@@ -140,7 +148,8 @@ class _HomePageState extends State<HomePage> {
                             selectedCategory == null) {
                           return;
                         }
-                        double? amount = double.tryParse(_amountController.text);
+                        double? amount =
+                            double.tryParse(_amountController.text);
                         if (amount == null) {
                           return;
                         }
@@ -171,7 +180,7 @@ class _HomePageState extends State<HomePage> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProfilePage()),
+        MaterialPageRoute(builder: (context) => ProfilePage(expenses: _expense,)),
       );
     } else {
       setState(() {
@@ -191,16 +200,20 @@ class _HomePageState extends State<HomePage> {
           Card(
             margin: const EdgeInsets.all(20),
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             elevation: 5,
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Text(
-                "Total: \$${_total.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Column(
+                children: [
+                  Text(
+                    "Total: \$${_total.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -231,7 +244,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       subtitle:
-                      Text(DateFormat.yMMMd().format(_expense[index].date)),
+                          Text(DateFormat.yMMMd().format(_expense[index].date)),
                       trailing: Text(
                         "\$${_expense[index].amount.toStringAsFixed(2)}",
                         style: const TextStyle(
@@ -246,6 +259,7 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
+          ElevatedButton(onPressed: ()=>{resetTotal()}, child: Text("Reset", style: TextStyle(color: Colors.redAccent, fontSize: 20, fontWeight: FontWeight.bold))),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -255,7 +269,8 @@ class _HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle, size: 40), label: 'Add'),
+              icon: Icon(Icons.add_circle, size: 40, color: Colors.green),
+              label: 'Add'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onTap: _onItemTapped,
